@@ -1,3 +1,6 @@
-outputs/
+__pycache__
+build/
+dist/
+*.egg-info*
 *.m4a
 *.webm
