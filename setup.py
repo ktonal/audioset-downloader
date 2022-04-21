@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 import os
 
 with open('README.md', 'r', encoding='utf-8') as f:
@@ -11,7 +11,7 @@ with open(os.path.join(os.path.dirname(__file__), 'requirements.txt'), "r", enco
 kwargs = {
     'name': 'audioset_downloader',
     'version': "0.0.1",
-    'description': 'cli for downloading examples from AudioSet',
+    'description': 'cli to download examples of a specific class from google AudioSet',
     'author': 'Antoine Daurat',
     'author_email': 'ktonalberlin@gmail.com',
     'url': 'https://github.com/ktonal/audioset-downloader',

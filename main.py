@@ -26,7 +26,7 @@ from contextlib import redirect_stderr
 @click.option("--exclude-unbalanced-set", "-xu", is_flag=True,
               help="if provided, exclude examples from the unbalanced set (default=False)")
 def download_cli(*args, **kwargs):
-    """download examples of a specific class from the AudioSet"""
+    """download examples of a specific class from google's AudioSet"""
     audioset_dl(*args, **kwargs)
 
 
