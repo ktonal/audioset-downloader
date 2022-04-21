@@ -7,6 +7,10 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import click
 from tqdm import tqdm
 from contextlib import redirect_stderr
+import os
+
+
+root = os.path.abspath(os.path.dirname(__file__))
 
 
 @click.command()
@@ -45,19 +49,20 @@ def audioset_dl(
         exclude_balanced_set=False,
         exclude_unbalanced_set=False,
 ):
-    ontology = pd.read_json("ontology.json")
+    output_dir = os.path.abspath(output_dir)
+    ontology = pd.read_json(os.path.join(root, "ontology.json"))
     audioset = pd.DataFrame()
     if not exclude_eval_set:
-        eval_ = pd.read_csv("csv/eval_segments.csv", header=2, quotechar='"', skipinitialspace=True)
+        eval_ = pd.read_csv(os.path.join(root, "csv", "eval_segments.csv"), header=2, quotechar='"', skipinitialspace=True)
         eval_["dir"] = "eval"
         audioset = pd.concat((audioset, eval_))
     if not exclude_balanced_set:
-        balanced = pd.read_csv("csv/balanced_train_segments.csv", header=2, quotechar='"', skipinitialspace=True)
+        balanced = pd.read_csv(os.path.join(root, "csv", "balanced_train_segments.csv"), header=2, quotechar='"', skipinitialspace=True)
         balanced["dir"] = "balanced"
         audioset = pd.concat((audioset, balanced))
 
     if not exclude_unbalanced_set:
-        unbalanced = pd.read_csv("csv/unbalanced_train_segments.csv", header=2, quotechar='"', skipinitialspace=True)
+        unbalanced = pd.read_csv(os.path.join(root, "csv", "unbalanced_train_segments.csv"), header=2, quotechar='"', skipinitialspace=True)
         unbalanced["dir"] = "unbalanced"
         audioset = pd.concat((audioset, unbalanced))
 
