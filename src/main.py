@@ -10,6 +10,11 @@ from contextlib import redirect_stderr
 import os
 
 
+__all__ = [
+    "audioset_dl",
+    "print_classes"
+]
+
 root = os.path.abspath(os.path.dirname(__file__))
 
 
@@ -36,7 +41,7 @@ def download_cli(*args, **kwargs):
 
 @click.command()
 def print_classes():
-    with open("class_names.txt", "r") as f:
+    with open(os.path.join(root, "class_names.txt"), "r") as f:
         cls = f.read()
     print(cls)
 
