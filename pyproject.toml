@@ -1,0 +1,42 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "audioset-downloader"
+dynamic = ["version"]
+description = "cli to download examples of a specific class from google AudioSet"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.6"
+authors = [
+    { name = "Antoine Daurat", email = "ktonalberlin@gmail.com" },
+]
+keywords = [
+    "audioset",
+    "dataset",
+    "deep-learning",
+    "sound",
+]
+dependencies = [
+    "pandas",
+    "tqdm",
+    "youtube-dl",
+]
+
+[project.scripts]
+audioset-classes = "src.main:print_classes"
+audioset-dl = "src.main:download_cli"
+
+[project.urls]
+Download = "https://github.com/ktonal/audioset-downloader"
+Homepage = "https://github.com/ktonal/audioset-downloader"
+
+[tool.hatch.version]
+path = "src/__init__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/",
+    "src/*.csv", "src/*.json"
+]

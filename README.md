@@ -1,6 +1,8 @@
 # audioset-downloader
 
-cli to download examples of a specific class from google's AudioSet
+cli for easily building datasets of audio files from google's AudioSet.
+
+**Update may 2023**: metadata has been extended with number of views, likes, comments, availability
 
 ## Installation
 
@@ -9,6 +11,13 @@ pip install audioset-downloader
 ```
 
 note that you'll need to have `ffmpeg` installed on your system.
+
+## Features
+
+- filter by class names (union or intersection)
+- filter by set (train [balanced, unbalanced], eval)
+- limit number of downloads
+- select most viewed / most liked
 
 ## Usage
 
@@ -27,6 +36,8 @@ Options:
                                  Techno`(list of available classes can be
                                  printed out with the command `audioset-
                                  classes`)
+  -u, --class-union              toggle whether class names should intersect
+                                 (default) or not
   -m, --mixed                    if provided, the downloaded examples will be
                                  instances of `--class-name` and possibly some
                                  other classes. Otherwise (default behaviour),
@@ -42,6 +53,10 @@ Options:
                                  matching)
   -f, --full-source              if provided, download full examples instead
                                  of 10 sec. segments (default=False)
+  -mv, --most-viewed             if --n-examples is provided, only the n most
+                                 viewed examples will be downloaded
+  -ml, --most-liked              if --n-examples is provided, only the n most
+                                 liked examples will be downloaded
   --help                         Show this message and exit.
 ```
 

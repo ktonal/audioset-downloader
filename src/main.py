@@ -25,6 +25,8 @@ root = os.path.abspath(os.path.dirname(__file__))
                    "this option can be repeated to select examples at the intersection of multiple classes"
                    "e.g. `-c Music -c Techno`"
                    "(list of available classes can be printed out with the command `audioset-classes`)")
+@click.option("--class-union", "-u", is_flag=True,
+              help="toggle whether class names should intersect (default) or not")
 @click.option("--mixed", "-m", is_flag=True,
               help="if provided, the downloaded examples will be instances of `--class-name` "
                    "and possibly some other classes."
@@ -39,6 +41,10 @@ root = os.path.abspath(os.path.dirname(__file__))
               help="number of examples to download (default=all matching)")
 @click.option("--full-source", "-f", is_flag=True,
               help="if provided, download full examples instead of 10 sec. segments (default=False)")
+@click.option("--most-viewed", "-mv", is_flag=True,
+              help="if --n-examples is provided, only the n most viewed examples will be downloaded")
+@click.option("--most-liked", "-ml", is_flag=True,
+              help="if --n-examples is provided, only the n most liked examples will be downloaded")
 def download_cli(*args, **kwargs):
     """download examples of a specific class from google's AudioSet"""
     audioset_dl(*args, **kwargs)
@@ -54,12 +60,15 @@ def print_classes():
 def audioset_dl(
         output_dir="outputs",
         class_name=("Snoring",),
+        class_union=False,
         mixed=False,
         exclude_eval_set=False,
         exclude_balanced_set=False,
         exclude_unbalanced_set=False,
         n_examples=None,
-        full_source=False
+        full_source=False,
+        most_viewed=False,
+        most_liked=False,
 ):
     output_dir = os.path.abspath(output_dir)
     ontology = pd.read_json(os.path.join(root, "ontology.json"))
@@ -70,13 +79,14 @@ def audioset_dl(
         eval_["dir"] = "eval"
         audioset = pd.concat((audioset, eval_))
     if not exclude_balanced_set:
-        balanced = pd.read_csv(os.path.join(root, "csv", "balanced_train_segments.csv"), header=2, quotechar='"',
+        balanced = pd.read_csv(os.path.join(root, "csv", "balanced_train_segments.csv"), header=2,
+                               quotechar='"',
                                skipinitialspace=True)
         balanced["dir"] = "balanced"
         audioset = pd.concat((audioset, balanced))
 
     if not exclude_unbalanced_set:
-        unbalanced = pd.read_csv(os.path.join(root, "csv", "unbalanced_train_segments.csv"), header=2, quotechar='"',
+        unbalanced = pd.read_csv(os.path.join(root, "csv", "unbalanced_train_segments.csv"), header=0, quotechar='"',
                                  skipinitialspace=True)
         unbalanced["dir"] = "unbalanced"
         audioset = pd.concat((audioset, unbalanced))
@@ -85,7 +95,8 @@ def audioset_dl(
         cls_id = []
         for name in class_name:
             cls_id += [ontology.id[ontology.name.str.fullmatch(name)].item()]
-        regex = ''.join(f"(?=.*{w})" for w in cls_id)
+        sep = '||' if class_union else ''
+        regex = sep.join(f"(?=.*{w})" for w in cls_id)
         regex = r'{}'.format(regex)
         cls_exmp = audioset.positive_labels.str.contains(regex, regex=True)
     else:
@@ -114,8 +125,27 @@ def audioset_dl(
     pool = ThreadPoolExecutor(max_workers=200)
     subset = audioset[cls_exmp]
     if n_examples is not None:
-        subset = subset.sample(n=n_examples)
+        if most_viewed:
+            subset = subset.sort_values("views", ascending=False).iloc[:n_examples]
+        elif most_liked:
+            subset = subset.sort_values("likes", ascending=False).iloc[:n_examples]
+        else:
+            subset = subset.sample(n=n_examples)
     futures = [pool.submit(_download, exmp) for exmp in subset.itertuples()]
     for _ in tqdm(as_completed(futures, timeout=None), total=cls_exmp.sum() if n_examples is None else n_examples,
                   file=sys.stdout, ncols=88):
         continue
+
+
+if __name__ == '__main__':
+    audioset_dl("./", (
+        "Electronic music",
+        "Techno",
+        "House music",
+        "Dubstep",
+        "Electro",
+        "Oldschool jungle",
+        "Electronica",
+        "Electronic dance music",
+        "Trance music",
+    ), True, exclude_unbalanced_set=False, most_viewed=True, n_examples=20)
